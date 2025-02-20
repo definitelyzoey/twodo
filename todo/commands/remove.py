@@ -27,6 +27,14 @@ class RemoveCommand(ToggleCommand):
         todos_removed = todos.copy()
         todos_removed.remove(item)
         return todos_removed
+    
+    def handle_done_search(self, todos, item):
+        todos_removed = todos.copy()
+        
+        if item['done'] == True:
+            todos_removed.remove(item)
+        
+        return todos_removed
 
 
 Remove = RemoveCommand()

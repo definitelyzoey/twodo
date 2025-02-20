@@ -64,11 +64,15 @@ class ToggleCommand(Command):
         new_data = data.copy()
         items_titles = self.get_titles_input()
         options_all = ['-a', '--all']
+        options_done = ['-d', '--done']
         todos = new_data['todos']
 
         if items_titles[0].lower() in options_all:
             for item in todos:
                 todos = self.handle_search(todos, item)
+        elif items_titles[0].lower() in options_done:
+            for item in todos:
+                todos = self.handle_done_search(todos, item)
         else:
             items_matching = [ item for item in todos if item['title'] in items_titles ]
             if items_matching:
