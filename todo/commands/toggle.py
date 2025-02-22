@@ -59,20 +59,18 @@ class ToggleCommand(Command):
 
 
     def update_todos(self, data):
-        """Returns the new todo list with the toggled items typed by the user
-        Function called when the user types the items' names"""
         new_data = data.copy()
         items_titles = self.get_titles_input()
-        options_all = ['-a', '--all']
-        options_done = ['-d', '--done']
+        options_all = ['-a', '-all']
+        options_done = ['-d', '-done']
         todos = new_data['todos']
 
         if items_titles[0].lower() in options_all:
             for item in todos:
-                todos = self.handle_search(todos, item)
+                todos = self.handle_search(todos, item) # Comfirmation before rm -rfing all the todos
         elif items_titles[0].lower() in options_done:
             for item in todos:
-                todos = self.handle_done_search(todos, item)
+                todos = self.handle_done_search(todos, item) # Error handling needed incase user does 'todo toggle -d' also maybe comfirmation?
         else:
             items_matching = [ item for item in todos if item['title'] in items_titles ]
             if items_matching:
@@ -95,6 +93,7 @@ class ToggleCommand(Command):
             if not items_matching:
                 sys.exit()
 
+        self.sort_dict(todos)
         return todos
 
 
