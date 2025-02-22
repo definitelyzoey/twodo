@@ -25,6 +25,6 @@ commands_dict = {
     'uncheck': Uncheck.run,
     'search': Search.run,
     'delete': Delete.run,
-    'del': Delete.run,
+    'dl': Delete.run,
     'rename': Rename.run,
 }
