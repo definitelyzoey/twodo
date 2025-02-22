@@ -17,6 +17,7 @@ class AddCommand(Command):
             new_item = { "done": False, "title": item }
             new_todos.append(new_item)
 
+        self.sort_dict(new_todos)
         return new_todos
 
 

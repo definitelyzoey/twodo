@@ -107,6 +107,11 @@ class Command:
         from todo.commands.init import Init
         Init.run()
 
+    # Sorts the dictonary (todo list) in an specific order
+    def sort_dict(self, dict):
+        dict.sort(key=lambda t: t['done'], reverse=True)
+        return
+
 
     def update_project(self, new_data):
         """Updates the project file with the new data"""
