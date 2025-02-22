@@ -84,7 +84,7 @@ class ToggleCommand(Command):
                     indexs_matching = [ index for index in index_matching ]
                     indexs_not_found = [ index for index in items_titles if index not in indexs_matching ]
                     
-                    if items_not_found:
+                    if indexs_not_found:
                         print(
                             '{info}Unknown {indexs_print}: {indexs}{reset}'
                             .format(
