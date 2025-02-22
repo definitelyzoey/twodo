@@ -17,7 +17,7 @@ class ListCommand(Command):
         if not name:
             name = self.UNTITLED_NAME
         print(
-            '{bold}{blue}{name:>14}{reset}'
+            '{bold}{blue}{name}{reset}'
             .format(
                 name=name,
                 blue=Fore.BLUE,
@@ -28,16 +28,17 @@ class ListCommand(Command):
 
     def print_todos(self, todos=[]):
         """Print all the todos"""
-        checked = lambda t: t['done']
-        for todo in sorted(todos, key=checked):
+        for todo in todos:
             is_done = todo['done']
-            status = ' ✓ ' if is_done else ' x '
+            status = ' ✔ ' if is_done else ' ✗ '
             color = Fore.GREEN if is_done else Style.RESET_ALL
+            todo_index = todos.index(todo)
             background = Back.GREEN if is_done else Back.WHITE
             safe_print(
-                ' {black}{background}{status}{reset}  {color}{title}{reset}'
+                '{index}){reset} {color}{title}{reset}{color}{status}{reset}'
                 .format(
                     status=status,
+                    index=todo_index,
                     title=todo['title'],
                     color=color,
                     black=Fore.BLACK,
@@ -64,7 +65,7 @@ class ListCommand(Command):
             no_items = len(todos)
             no_checked = len([t for t in todos if t['done'] ])
             print(
-                '{info}{no_items:>2} items: {no_checked} completed, {no_unchecked} left{reset}'
+                '{info}{no_items} items: {no_checked} completed, {no_unchecked} left{reset}'
                 .format(
                     no_items=no_items,
                     no_checked=no_checked,
