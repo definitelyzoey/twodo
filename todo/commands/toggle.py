@@ -57,6 +57,63 @@ class ToggleCommand(Command):
         except KeyboardInterrupt:
             self.cancel_command()
 
+    def toggle_str(self, title, todos):
+        items_matching = [ item for item in todos if item['title'] == title ]
+        if items_matching:
+            for item_found in items_matching:
+                return self.handle_search(todos, item_found)
+
+        # If there are no items matching the title, we print the title to the user.
+        items_not_found = []
+        for item in todos:
+            if item['title'] != title:
+                if str(title) in items_not_found:
+                    break
+                else:
+                    items_not_found.append(str(title))
+        
+        if items_not_found:
+           print(
+                '{info}Unknown {items_print}: {items}{reset}'
+                .format(
+                    info=Fore.INFO,
+                    reset=Style.RESET_ALL,
+                    items_print=('items' if len(items_not_found) > 1 else 'item'),
+                    items=', '.join(items_not_found),
+                )
+            )
+           
+        return todos
+    
+    def toggle_int(self, title, todos):
+        items_matching = [ item for item in todos if todos.index(item) == title ]
+
+        if items_matching:
+            for item_found in items_matching:
+                return self.handle_search(todos, item_found)
+        
+        # If there are no items matching the index, we print the index to the user.
+        items_not_found = []
+        for item in todos:
+            if todos.index(item) != title:
+                if str(title) in items_not_found:
+                    break
+                else:
+                    items_not_found.append(str(title))
+        
+        if items_not_found:
+           print(
+                '{info}Unknown {items_print}: {items}{reset}'
+                .format(
+                    info=Fore.INFO,
+                    reset=Style.RESET_ALL,
+                    items_print=('indexs' if len(items_not_found) > 1 else 'index'),
+                    items=', '.join(items_not_found),
+                )
+            )
+           
+        return todos
+
 
     def update_todos(self, data):
         new_data = data.copy()
@@ -65,61 +122,30 @@ class ToggleCommand(Command):
         options_done = ['-d', '-done']
         todos = new_data['todos']
 
-        if items_titles[0].lower() in options_all:
+        if items_titles[0].lower() in options_all: # Make it so it toggles all on.. not toggles all the oposite state
             for item in todos:
-                todos = self.handle_search(todos, item) # Comfirmation before rm -rfing all the todos
+                todos = self.handle_search(todos, item)
         elif items_titles[0].lower() in options_done:
             for item in todos:
-                todos = self.handle_done_search(todos, item) # Error handling needed incase user does 'todo toggle -d' also maybe comfirmation?
+                try:
+                    todos = self.handle_done_search(todos, item) # Maybe confirmation?
+                except AttributeError:
+                    print(
+                        '{warning}No handle found.{reset}'
+                        .format(
+                            warning=Fore.WARNING,
+                            reset=Style.RESET_ALL,
+                        )
+                    )
+
+                    sys.exit()
         else:
             for title in items_titles:
                 try:
-                    index = int(title)
-                    
-                    index_matching = [ item for item in todos if todos.index(item) == index]
-                    if index_matching:
-                        for item_found in index_matching:
-                            todos = self.handle_search(todos, item_found)
-                    
-                    indexs_matching = [ index for index in index_matching ]
-                    indexs_not_found = [ index for index in items_titles if index not in indexs_matching ]
-                    
-                    if indexs_not_found:
-                        print(
-                            '{info}Unknown {indexs_print}: {indexs}{reset}'
-                            .format(
-                                info=Fore.INFO,
-                                reset=Style.RESET_ALL,
-                                indexs_print=('indexs' if len(indexs_not_found) > 1 else 'index'),
-                                indexs=', '.join(indexs_not_found),
-                            )
-                        )
-
-                    if not index_matching:
-                        sys.exit()
-
+                    title = int(title)
+                    todos = self.toggle_int(title, todos)
                 except ValueError:
-                    items_matching = [ item for item in todos if item['title'] == title ]
-                    if items_matching:
-                        for item_found in items_matching:
-                            todos = self.handle_search(todos, item_found)
-                    
-                    titles_matching = [ item['title'] for item in items_matching ]
-                    items_not_found = [ item for item in items_titles if item not in titles_matching ]
-
-                    if items_not_found:
-                        print(
-                            '{info}Unknown {items_print}: {items}{reset}'
-                            .format(
-                                info=Fore.INFO,
-                                reset=Style.RESET_ALL,
-                                items_print=('items' if len(items_not_found) > 1 else 'item'),
-                                items=', '.join(items_not_found),
-                            )
-                        )
-                    
-                    if not items_matching:
-                        sys.exit()
+                    todos = self.toggle_str(title, todos)
 
         self.sort_dict(todos)
         return todos
