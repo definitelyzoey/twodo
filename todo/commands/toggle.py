@@ -27,12 +27,13 @@ class ToggleCommand(Command):
         return todos_toggled
 
 
-    def search_handle(self, todos, item): # Searches toggled items threw the terminal
+    def toggle_handle(self, todos, item): # Searches toggled items threw the terminal
         todos_toggled = todos.copy()
         item_index = todos_toggled.index(item)
         item_to_toggle = todos_toggled[item_index]
         todos_toggled[item_index] = self.toggle_item(item_to_toggle)
         return todos_toggled
+
 
     def open_list(self, data, name):
         if len(data['todos']) == 0:
@@ -47,84 +48,96 @@ class ToggleCommand(Command):
         except KeyboardInterrupt:
             self.cancel_command()
 
+    def toggle_str(self, title, todos):
+        items_matching = [ item for item in todos if item['title'] == title ]
+        if items_matching:
+            for item_found in items_matching:
+                return self.handle_search(todos, item_found)
+
+        # If there are no items matching the title, we print the title to the user.
+        items_not_found = []
+        for item in todos:
+            if item['title'] != title:
+                if str(title) in items_not_found:
+                    break
+                else:
+                    items_not_found.append(str(title))
+        
+        if items_not_found:
+           print(
+                '{info}Unknown {items_print}: {items}{reset}'
+                .format(
+                    info=Fore.INFO,
+                    reset=Style.RESET_ALL,
+                    items_print=('items' if len(items_not_found) > 1 else 'item'),
+                    items=', '.join(items_not_found),
+                )
+            )
+           
+        return todos
+    
+    def toggle_int(self, title, todos):
+        items_matching = [ item for item in todos if todos.index(item) == title ]
+
+        if items_matching:
+            for item_found in items_matching:
+                return self.handle_search(todos, item_found)
+        
+        # If there are no items matching the index, we print the index to the user.
+        items_not_found = []
+        for item in todos:
+            if todos.index(item) != title:
+                if str(title) in items_not_found:
+                    break
+                else:
+                    items_not_found.append(str(title))
+        
+        if items_not_found:
+           print(
+                '{info}Unknown {items_print}: {items}{reset}'
+                .format(
+                    info=Fore.INFO,
+                    reset=Style.RESET_ALL,
+                    items_print=('indexs' if len(items_not_found) > 1 else 'index'),
+                    items=', '.join(items_not_found),
+                )
+            )
+           
+        return todos
+
     def update_todos(self, data):
         new_data = data.copy()
         items_titles = self.get_titles_input()
-        options_all = ['-a', '-all']
-        options_done = ['-d', '-done']
+        prefix_all = ['-a', '-all']
+        prefix_done = ['-d', '-done']
         todos = new_data['todos']
 
-        if items_titles[0].lower() in options_all:
+        if items_titles[0].lower() in prefix_all:
             for item in todos:
-                todos = self.search_handle(todos)
-        elif items_titles[0].lower() in options_done: # Maybe add confirmation?
-            for item in todos:
-                try: # Basically error handing for anything other than todo remove -d as it breaks the code.
-                    todos = self.search_done_handle(todos, item)
-                except AttributeError:
-                    print(
-                        '{warning}No command found.{reset}'
-                        .format(
-                            warning=Fore.WARNING,
-                            reset=Style.RESET_ALL,
-                        )
+                todos = self.toggle_handle(todos)
+        elif items_titles[0].lower() in prefix_done: # Check what command is being used and filter.
+            allowed_commands = ['todo remove']
+            if self.get_command_name() in allowed_commands:
+                for item in todos:
+                    if item['done'] == True:
+                        todos = self.toggle_handle(todos)
+            else:
+                print(
+                    '{warning}Prefix not avaliable with current command.{reset}'
+                    .format(
+                        warning=Fore.WARNING,
+                        reset=Style.RESET_ALL,
                     )
+                )
 
-                    sys.exit()
+                sys.exit()
         else:
             for title in items_titles:
                 try:
                     title = int(title)
-                    items_matching = [ item for item in todos if todos.index(item) == title ]
-            
-                    if items_matching:
-                        for item_found in items_matching:
-                            todos = self.search_handle(todos, item_found)
-                    
-                    # If there are no items matching the index, we print the index to the user.
-                    items_not_found = []
-                    for item in todos:
-                        if todos.index(item) != title:
-                            if str(title) in items_not_found:
-                                break
-                            else:
-                                items_not_found.append(str(title))
-                    
-                    if items_not_found:
-                       print(
-                            '{info}Unknown {items_print}: {items}{reset}'
-                            .format(
-                                info=Fore.INFO,
-                                reset=Style.RESET_ALL,
-                                items_print=('indexs' if len(items_not_found) > 1 else 'index'),
-                                items=', '.join(items_not_found),
-                            )
-                        )
+                    todos = self.toggle_int(title, todos)
                 except ValueError:
-                    items_matching = [ item for item in todos if item['title'] == title ]
-                    if items_matching:
-                        for item_found in items_matching:
-                            todos = self.search_handle(todos, item_found)
-
-                    # If there are no items matching the title, we print the title to the user.
-                    items_not_found = []
-                    for item in todos:
-                        if item['title'] != title:
-                            if str(title) in items_not_found:
-                                break
-                            else:
-                                items_not_found.append(str(title))
-
-                    if items_not_found:
-                       print(
-                            '{info}Unknown {items_print}: {items}{reset}'
-                            .format(
-                                info=Fore.INFO,
-                                reset=Style.RESET_ALL,
-                                items_print=('items' if len(items_not_found) > 1 else 'item'),
-                                items=', '.join(items_not_found),
-                            )
-                        )
+                    todos = self.toggle_str(title, todos)
 
         self.sort_dict(todos)
         return todos
