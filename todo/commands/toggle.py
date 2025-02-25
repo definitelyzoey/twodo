@@ -10,40 +10,31 @@ from todo.utils.styles import Fore, Style
 
 
 class ToggleCommand(Command):
-    def get_subtitle(self):
+    def get_subtitle(self): # change to base.py?
         """Returns the subtitle of the menu"""
         return 'Toggle items'
 
-
-    def check_by_item(self, item):
-        """Returns a toggled copy of the item"""
+    def toggle_item(self, item): # Toggles the item
         item_toggled = item.copy()
         status = item['done']
         item_toggled['done'] = not status
         return item_toggled
 
-
-    def handle_click(self, todos, item_index):
-        """Returns a copy of the todos with the toggled item clicked
-        Function called when the user select the item in the interactive menu"""
+    def menu_handle(self, todos, item_index): # Searches toggled items threw the menu
         todos_toggled = todos.copy()
         item_to_toggle = todos[item_index]
-        todos_toggled[item_index] = self.check_by_item(item_to_toggle)
+        todos_toggled[item_index] = self.toggle_item(item_to_toggle)
         return todos_toggled
 
 
-    def handle_search(self, todos, item):
-        """Returns a copy of the todos with the toggled item found
-        Function called when the item title has been typed in the command line"""
+    def search_handle(self, todos, item): # Searches toggled items threw the terminal
         todos_toggled = todos.copy()
         item_index = todos_toggled.index(item)
         item_to_toggle = todos_toggled[item_index]
-        todos_toggled[item_index] = self.check_by_item(item_to_toggle)
+        todos_toggled[item_index] = self.toggle_item(item_to_toggle)
         return todos_toggled
 
-
     def open_list(self, data, name):
-        """Opens the interactive menu to toggle the items"""
         if len(data['todos']) == 0:
             raise KeyError
         try:
@@ -51,7 +42,7 @@ class ToggleCommand(Command):
                 name,
                 self.get_subtitle(),
                 data['todos'],
-                self.handle_click
+                self.menu_handle
             )
         except KeyboardInterrupt:
             self.cancel_command()
@@ -65,12 +56,12 @@ class ToggleCommand(Command):
 
         if items_titles[0].lower() in options_all:
             for item in todos:
-                todos = self.handle_search(todos, item)  # Make it so it toggles it as done.. not toggles the oposite state
-        elif items_titles[0].lower() in options_done: # Maybe confirmation?
+                todos = self.search_handle(todos)
+        elif items_titles[0].lower() in options_done: # Maybe add confirmation?
             for item in todos:
-                try:
-                    todos = self.handle_done_search(todos, item)
-                except AttributeError: # Basically error handing for todo toggle -d as that breaks the code.
+                try: # Basically error handing for anything other than todo remove -d as it breaks the code.
+                    todos = self.search_done_handle(todos, item)
+                except AttributeError:
                     print(
                         '{warning}No command found.{reset}'
                         .format(
@@ -88,7 +79,7 @@ class ToggleCommand(Command):
             
                     if items_matching:
                         for item_found in items_matching:
-                            todos = self.handle_search(todos, item_found)
+                            todos = self.search_handle(todos, item_found)
                     
                     # If there are no items matching the index, we print the index to the user.
                     items_not_found = []
@@ -113,7 +104,7 @@ class ToggleCommand(Command):
                     items_matching = [ item for item in todos if item['title'] == title ]
                     if items_matching:
                         for item_found in items_matching:
-                            todos = self.handle_search(todos, item_found)
+                            todos = self.search_handle(todos, item_found)
 
                     # If there are no items matching the title, we print the title to the user.
                     items_not_found = []
