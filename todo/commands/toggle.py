@@ -52,7 +52,7 @@ class ToggleCommand(Command):
         items_matching = [ item for item in todos if item['title'] == title ]
         if items_matching:
             for item_found in items_matching:
-                return self.handle_search(todos, item_found)
+                return self.toggle_handle(todos, item_found)
 
         # If there are no items matching the title, we print the title to the user.
         items_not_found = []
@@ -81,7 +81,7 @@ class ToggleCommand(Command):
 
         if items_matching:
             for item_found in items_matching:
-                return self.handle_search(todos, item_found)
+                return self.toggle_handle(todos, item_found)
         
         # If there are no items matching the index, we print the index to the user.
         items_not_found = []
