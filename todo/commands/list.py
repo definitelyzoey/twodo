@@ -30,12 +30,12 @@ class ListCommand(Command):
         """Print all the todos"""
         for todo in todos:
             is_done = todo['done']
-            status = ' ✔ ' if is_done else ' ✗ '
+            status = '✔' if is_done else '✗'
             color = Fore.GREEN if is_done else Style.RESET_ALL
             todo_index = todos.index(todo)
             background = Back.GREEN if is_done else Back.WHITE
             safe_print(
-                '{index}){reset} {color}{title}{reset}{color}{status}{reset}'
+                '{index}: {reset}{color}{title}{reset} {color}[{status}]{reset}'
                 .format(
                     status=status,
                     index=todo_index,
