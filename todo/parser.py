@@ -12,7 +12,7 @@ class Parser:
         print(
             '{fail}usage: {blue}{prog} {green}<command>{reset} [options]'
             .format(
-                prog='todo',
+                prog='todo/twodo',
                 fail=Fore.FAIL,
                 blue=Fore.BLUE,
                 green=Fore.GREEN,
