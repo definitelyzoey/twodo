@@ -21,12 +21,12 @@ class RemoveCommand(ToggleCommand):
         return todos_removed
 
 
-    def toggle_handle(self, todos, item): # Removes all todos
+    def toggle_handle(self, todos, item):
         todos_removed = todos.copy()
         todos_removed.remove(item)
         return todos_removed
     
-    def search_all_handle(self, todos, item):
+    def search_all_handle(self, todos, item): # Removes all todos
         return self.toggle_handle(todos, item)
     
     def search_done_handle(self, todos, item): # Removes all of the compleated todos
